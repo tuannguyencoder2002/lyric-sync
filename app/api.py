@@ -6,9 +6,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
-from fastapi.staticfiles import StaticFiles
 
-from . import config, danh_gia, doc_loi, jobs, khoa, lyrics, srt
+from . import config, danh_gia, doc_loi, jobs, khoa, lyrics, srt, tinh
 from . import align as al
 from . import audio as A
 from .separate import tach_giong
@@ -181,4 +180,4 @@ def api_health():
 # /api/* không bị lớp file tĩnh nuốt mất.
 _web = config.GOC / "web"
 if _web.exists():
-    app.mount("/", StaticFiles(directory=str(_web), html=True), name="web")
+    app.mount("/", tinh.FileTinh(directory=str(_web), html=True), name="web")

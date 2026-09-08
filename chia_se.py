@@ -119,6 +119,16 @@ def main():
             print("  Đóng cửa sổ này là đường hầm đóng theo, khách không vào")
             print("  được nữa. Máy phải bật và app phải chạy suốt buổi thử.")
             print()
+            # Mở luôn cửa sổ dùng tại chỗ. Chia sẻ cho khách không có nghĩa là
+            # mình mất bản của mình — mà chạy hai máy chủ song song chỉ để có
+            # cả hai thì tốn thêm một lượt nạp model vào GPU.
+            try:
+                import launcher
+                launcher._mo_cua_so(f"http://127.0.0.1:{cong}/")
+                print(f"  Cửa sổ trên máy này cũng đã mở. Mật khẩu vẫn là {mat_khau}.")
+                print()
+            except Exception as e:
+                print(f"  (không mở được cửa sổ tại chỗ: {e})")
         elif dia_chi and ("ERR" in dong or "error" in dong.lower()):
             print(f"  [hầm] {dong.strip()}")
 
