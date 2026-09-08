@@ -59,33 +59,39 @@
       </div>
 
       <div id="kq" hidden>
-        <div class="so-lieu">
-          <div><b id="sl-cau">0</b><span>Lines</span></div>
-          <div><b id="sl-tu">0</b><span>Words</span></div>
-          <div title="Vocal energy inside the timed lines vs outside them. Higher means the marks landed on the singing."><b id="sl-khop">—</b><span>Fit</span></div>
-          <div title="How sure the acoustic model is about the phonemes. Singing always scores lower than speech — a low number here does not mean the timing is wrong."><b id="sl-diem">0%</b><span>Phoneme</span></div>
-          <div><b id="sl-tg">0:00</b><span>Length</span></div>
+        <div class="dau-kq">
+          <div class="so-lieu">
+            <div><b id="sl-cau">0</b><span>Lines</span></div>
+            <div><b id="sl-tu">0</b><span>Words</span></div>
+            <div title="Vocal energy inside the timed lines vs outside them. Higher means the marks landed on the singing."><b id="sl-khop">—</b><span>Fit</span></div>
+            <div title="How sure the acoustic model is about the phonemes. Singing always scores lower than speech — a low number here does not mean the timing is wrong."><b id="sl-diem">0%</b><span>Phoneme</span></div>
+            <div><b id="sl-tg">0:00</b><span>Length</span></div>
+          </div>
+
+          <div class="xuat">
+            <button class="chinh-nho" data-fmt="srt">Download SRT</button>
+            <div class="them">
+              <button class="nho" data-fmt="vtt">VTT</button>
+              <button class="nho" data-fmt="lrc">LRC</button>
+              <button class="nho" data-fmt="lrc_word">LRC word</button>
+              <button class="nho" data-fmt="srt_word">SRT word</button>
+              <button class="nho" data-fmt="json">JSON</button>
+            </div>
+          </div>
         </div>
 
         <canvas class="song" id="song"></canvas>
         <div class="dieu-khien">
           <button class="nho" id="phat">Play</button>
           <span class="gio" id="gio">0:00 / 0:00</span>
+          <span class="day"></span>
+          <span class="meo">scroll to zoom · drag to pan · space to play · ←→ to step · 0 to fit · double-click to reset</span>
         </div>
 
         <table class="bang">
           <thead><tr><th style="width:126px">Time</th><th style="width:22px"></th><th>Line</th><th style="width:92px"></th></tr></thead>
           <tbody id="dong-loi"></tbody>
         </table>
-
-        <div class="xuat">
-          <button class="nho" data-fmt="srt">SRT</button>
-          <button class="nho" data-fmt="vtt">VTT</button>
-          <button class="nho" data-fmt="lrc">LRC</button>
-          <button class="nho" data-fmt="lrc_word">LRC word</button>
-          <button class="nho" data-fmt="srt_word">SRT word</button>
-          <button class="nho" data-fmt="json">JSON</button>
-        </div>
       </div>
     </div>
 

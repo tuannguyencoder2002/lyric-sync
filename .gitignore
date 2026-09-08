@@ -25,3 +25,6 @@ desktop.ini
 # nguồn của mình — để trong repo là mang tài sản của khách đi gửi chỗ khác.
 Lyric_rap_test.txt
 *_test.txt
+
+# cloudflared.exe 52 MB, tải lại được bằng một dòng lệnh (xem chia_se.py)
+runtime/

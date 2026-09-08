@@ -63,9 +63,39 @@ Không có card NVIDIA thì vẫn chạy, chậm hơn khoảng 4-5 lần.
 - Bảng kết quả có **chấm trạng thái** từng câu: xanh là mốc mở câu rõ ràng,
   vàng là mờ, đỏ là nên nghe lại, xám là câu hát liền mạch với câu trước nên
   không có khoảng lặng nào để đánh giá.
-- Bấm vào một dòng là nhảy tới đúng chỗ đó trong bài.
+- Bấm vào một dòng là nhảy tới đúng chỗ đó trong bài, và thanh sóng kéo theo.
 - Nút `−` `+` dời một câu 0,1 giây. Căn tự động không bao giờ đúng tuyệt đối;
   có nút dời tay thì sửa tại chỗ trong ba giây.
+- Nút tải file nằm ở **thanh dính đầu khối kết quả**, luôn nhìn thấy kể cả khi
+  đang cuộn tới dòng thứ 60. Trước đó nó nằm dưới bảng và người dùng phải cuộn
+  hết bảng mới tới — trong khi tải file mới là việc họ vào đây để làm.
+
+## Thao tác trên thanh sóng
+
+| Thao tác | Việc |
+|---|---|
+| lăn chuột | thu phóng, **neo vào chỗ con trỏ** đang chỉ |
+| kéo thân sóng | dịch ngang |
+| bấm thân sóng | tua tới đó |
+| kéo trên thước hoặc sát vạch trắng | rê vạch phát |
+| bấm đúp | xem lại cả bài |
+| `Space` | phát / dừng |
+| `←` `→` | lùi/tới 1 giây, giữ `Shift` thành 5 giây |
+| `+` `−` | thu phóng |
+| `0` | xem lại cả bài |
+
+Ba chi tiết nhỏ nhưng thiếu là hỏng:
+
+- Lăn chuột phải gắn bằng `addEventListener(..., {passive: false})`. Dùng
+  thuộc tính `onwheel` thì `preventDefault` không có tác dụng và **mỗi lần lăn
+  là cả trang cuộn theo**.
+- Nấc thu phóng **nhân/chia** chứ không cộng/trừ, và nấc cho chuột (1,22) nhẹ
+  hơn nấc cho phím (1,45) — một cú lăn phát ra nhiều sự kiện liền nhau.
+- Mọi phím tắt đi qua một cửa chặn `dangGo()`. Người dùng gõ lời vào ô nhập mà
+  dấu cách là phím phát/dừng: thiếu cửa chặn thì gõ một khoảng trắng là nhạc chạy.
+
+Vạch phát có vùng bắt rộng 7px chứ không phải đúng 1,5px của nét vẽ — bấm trúng
+một vạch một điểm rưỡi bằng chuột là việc không ai làm được.
 
 ## Hai con số ở đầu bảng kết quả, đọc thế nào
 

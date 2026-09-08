@@ -311,11 +311,15 @@ button.nho { height: 26px; padding: 0 10px; font-size: 11.5px; }
 
 .xuat {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--vien);
+  flex-wrap: wrap;
+}
+
+.xuat .them {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .so-lieu {
@@ -454,3 +458,73 @@ button.nho { height: 26px; padding: 0 10px; font-size: 11.5px; }
 }
 
 .nho-tha .to { font-size: 12px; }
+
+/* Nhắc phím tắt. Để ngay cạnh thanh điều khiển chứ không giấu trong một trang
+   trợ giúp: thao tác nào không ai biết là có thì coi như không tồn tại. */
+.meo {
+  font-size: 10.5px;
+  color: #5a5a63;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Con trỏ đổi theo chỗ: thân sóng kéo được nên hiện bàn tay. */
+.song { cursor: grab; }
+.song:active { cursor: grabbing; }
+
+/* ------------------------------------------------------ đầu khối kết quả
+
+   Thanh này DÍNH ở đỉnh cột phải. Trước đó nút xuất file nằm dưới bảng lời;
+   một bài rap 63 dòng thì sync xong người dùng thấy một bảng dài và không
+   thấy nút đâu — trong khi xuất file chính là việc họ vào đây để làm.
+
+   Dính chứ không chỉ đưa lên trên: cuộn xuống soát dòng thứ 50 rồi vẫn phải
+   với tới được nút xuất, không phải cuộn ngược lên. */
+.dau-kq {
+  position: sticky;
+  top: calc(var(--le) * -1);
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--nen);
+  padding: var(--le) 0 12px;
+  margin-top: calc(var(--le) * -1);
+  border-bottom: 1px solid var(--vien);
+  margin-bottom: 14px;
+}
+
+.dau-kq .so-lieu { margin-bottom: 0; }
+
+/* Nút chính của khối: nhỏ hơn nút Sync ở cột trái, nhưng vẫn là nút duy nhất
+   được tô đầy — SRT là thứ chín trên mười người tải về. */
+button.chinh-nho {
+  height: 30px;
+  padding: 0 14px;
+  background: var(--nhan);
+  border-color: var(--nhan);
+  font-weight: 600;
+}
+
+button.chinh-nho:hover:not(:disabled) {
+  background: var(--nhan2);
+  border-color: var(--nhan2);
+}
+
+/* Tiêu đề bảng dính NGAY DƯỚI thanh trên.
+   
+   Trị số do JS đo rồi đặt vào, không ghim cứng: chiều cao thanh trên đổi theo
+   cỡ màn (biến --le) và theo chỗ các nút xuống dòng. Ghim cứng 92px thì trên
+   màn khác nó lệch, và chỗ lệch ấy để lọt một dòng dữ liệu trồi lên nằm TRÊN
+   cả tiêu đề — nhìn như bảng vỡ. */
+.bang th { top: var(--th-tren, 60px); }
+
+@media (max-width: 1080px) {
+  /* Cửa sổ hẹp thì cả trang cuộn chứ không phải cột cuộn, nên dính theo cột
+     không còn nghĩa gì. */
+  .dau-kq { position: static; margin-top: 0; }
+  .bang th { top: 0; }
+}

@@ -8,12 +8,16 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import config, danh_gia, doc_loi, jobs, lyrics, srt
+from . import config, danh_gia, doc_loi, jobs, khoa, lyrics, srt
 from . import align as al
 from . import audio as A
 from .separate import tach_giong
 
 app = FastAPI(title="Lyric Sync")
+
+# Lớp khoá chỉ xuất hiện khi có biến môi trường LYRIC_SYNC_PASS — tức là khi
+# app được mở ra ngoài mạng. Chạy ở máy mình thì không đổi gì.
+_mat_khau = khoa.gan_neu_can(app)
 
 # Kết quả giữ trong bộ nhớ theo mã việc: mốc thời gian từng từ để giao diện vẽ,
 # và để xuất ra bất kỳ định dạng nào mà không phải căn lại.
