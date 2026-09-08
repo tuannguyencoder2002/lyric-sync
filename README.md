@@ -55,6 +55,10 @@ Từ lần sau không tải nữa.
 
 Không có card NVIDIA thì vẫn chạy, chậm hơn khoảng 4-5 lần.
 
+Demucs chạy chế độ tính hỗn hợp trên GPU: nhanh gấp **2,27 lần**, sai lệch
+−62 dB dưới tín hiệu (không nghe ra, và không ảnh hưởng gì tới mốc thời gian).
+Cần bản trùng khớp từng bit thì đặt biến môi trường `DEMUCS_FP32=1`.
+
 ## Giao diện
 
 - Thả file nhạc và file lời vào, bấm **Sync**. Kéo **cả hai file cùng lúc**
