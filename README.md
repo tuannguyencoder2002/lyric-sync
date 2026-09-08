@@ -174,6 +174,30 @@ mấy nghìn ký tự rác vào ô nhập.
 - Nốt hát trên nền nhạc rất dày (metal, EDM nén mạnh) thì tách vocal kém hơn,
   kéo theo căn kém hơn.
 
+## Cho khách vào thử từ xa
+
+Bấm `Chia-se.bat`. Nó bật máy chủ, mở đường hầm Cloudflare, và in ra một địa
+chỉ https gửi được ngay cho khách. App vẫn chạy trên máy mình, dùng GPU máy
+mình, đủ mọi tính năng — Cloudflare chỉ làm chỗ trung chuyển.
+
+Vì sao không thuê máy chủ: tool cần GPU và mang theo hơn 3 GB thư viện. Thuê
+một máy có GPU chỉ để khách bấm thử vài bài là tốn tiền và mất cả buổi dựng.
+
+Hai điều phải biết:
+
+- **Địa chỉ đổi mỗi lần mở lại.** Muốn cố định thì cần tên miền riêng và một
+  tài khoản Cloudflare.
+- **Đóng cửa sổ lệnh là khách mất kết nối.** Máy phải bật suốt buổi thử.
+
+Mặc định **không có mật khẩu** — địa chỉ do Cloudflare sinh ngẫu nhiên, gửi
+riêng cho một khách thì thêm bước gõ mật khẩu chỉ làm phiền họ.
+
+Thêm `--khoa` thì có mật khẩu, sinh mới mỗi lần mở:
+
+    runtime\python\python.exe chia_se.py --khoa
+
+Nên dùng khi gửi cho nhiều người, hoặc khi để hầm mở lâu ngày.
+
 ## Cỡ màn hình
 
 Đã thử thật bằng trình duyệt ở bốn cỡ: laptop 1366×768, laptop 1536×864,

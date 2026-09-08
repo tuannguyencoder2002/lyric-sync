@@ -8,8 +8,11 @@ mang theo hơn 3 GB thư viện. Thuê một máy chủ có GPU chỉ để khá
 bài là tốn tiền và mất cả buổi dựng. Đường hầm thì app vẫn chạy trên máy này,
 Cloudflare chỉ làm chỗ trung chuyển, và tắt cửa sổ là hết.
 
-BẮT BUỘC CÓ MẬT KHẨU. App nhận file tải lên, chạy GPU và trả về file — mở
-trần ra Internet là ai dò được địa chỉ cũng dùng được máy bạn.
+Mặc định KHÔNG khoá: địa chỉ do Cloudflare sinh ngẫu nhiên, gửi riêng cho một
+khách trong một buổi thử thì thêm bước gõ mật khẩu chỉ làm phiền họ.
+
+Cần khoá thì thêm tham số --khoa. Nên dùng khi gửi cho nhiều người, hoặc khi
+để hầm mở lâu: app nhận file tải lên và chạy GPU, ai có địa chỉ là dùng được.
 """
 import os
 import re
@@ -70,11 +73,15 @@ def main():
 
     from app import khoa
 
-    # Mật khẩu sinh mới mỗi lần mở. Cố định một mật khẩu trong file thì nó sống
-    # mãi, mà đường hầm thì chỉ sống vài tiếng — hết buổi thử là mật khẩu cũ
-    # thành vô dụng, đúng như mong muốn.
-    mat_khau = os.environ.get("LYRIC_SYNC_PASS") or khoa.sinh_mat_khau()
-    os.environ["LYRIC_SYNC_PASS"] = mat_khau
+    # Mật khẩu sinh mới mỗi lần mở, chứ không cố định trong file: đường hầm chỉ
+    # sống vài tiếng, hết buổi thử là mật khẩu cũ thành vô dụng — đúng ý muốn.
+    co_khoa = "--khoa" in sys.argv
+    mat_khau = ""
+    if co_khoa:
+        mat_khau = os.environ.get("LYRIC_SYNC_PASS") or khoa.sinh_mat_khau()
+        os.environ["LYRIC_SYNC_PASS"] = mat_khau
+    else:
+        os.environ.pop("LYRIC_SYNC_PASS", None)
 
     from app import config
     from app.api import app as ung_dung
@@ -110,10 +117,12 @@ def main():
             print("=" * 60)
             print("  GỬI CHO KHÁCH HAI DÒNG NÀY:")
             print()
-            print(f"    Địa chỉ   {dia_chi}")
-            print(f"    Tài khoản khach")
-            print(f"    Mật khẩu  {mat_khau}")
+            print(f"    {dia_chi}")
             print()
+            if co_khoa:
+                print(f"    Tài khoản  khach")
+                print(f"    Mật khẩu   {mat_khau}")
+                print()
             print("=" * 60)
             print()
             print("  Đóng cửa sổ này là đường hầm đóng theo, khách không vào")
@@ -125,7 +134,7 @@ def main():
             try:
                 import launcher
                 launcher._mo_cua_so(f"http://127.0.0.1:{cong}/")
-                print(f"  Cửa sổ trên máy này cũng đã mở. Mật khẩu vẫn là {mat_khau}.")
+                print("  Cửa sổ trên máy này cũng đã mở.")
                 print()
             except Exception as e:
                 print(f"  (không mở được cửa sổ tại chỗ: {e})")
