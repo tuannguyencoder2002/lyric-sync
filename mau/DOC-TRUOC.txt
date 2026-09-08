@@ -1,0 +1,14 @@
+Bo file thu nhanh.
+
+  bai-thu.mp3   17 giay. KHONG phai nhac that: giong doc bang TTS Windows
+                ghep voi nhac nen sine + noise, dung de kiem tra tool chay
+                dung, khong dung de danh gia do chinh xac tren giong hat.
+  loi-thu.txt   dung lai loi cua file tren.
+
+Cach thu:
+  1. Bam Run.bat
+  2. Tha bai-thu.mp3 vao o Audio
+  3. Dan noi dung loi-thu.txt vao o Lyrics
+  4. Bam Sync
+
+Ket qua dung se ra 4 dong, do tin cay 0.87-0.98.

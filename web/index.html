@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyric Sync</title>
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<div class="khung">
+
+  <div class="thanh-tren">
+    <span class="cham"></span>
+    <span class="ten">Lyric Sync</span>
+    <span class="day"></span>
+    <span class="the" id="the-gpu">…</span>
+  </div>
+
+  <div class="than">
+
+    <div class="cot">
+      <div class="muc">
+        <p class="nhan">Audio</p>
+        <div class="tha" id="tha">
+          <div class="to" id="ten-file">Drop a track</div>
+          <div class="nho" id="thong-tin">mp3 · wav · m4a · flac</div>
+        </div>
+        <input type="file" id="chon-file" accept="audio/*,video/*" multiple hidden>
+      </div>
+
+      <div class="muc">
+        <p class="nhan">Lyrics</p>
+        <div class="tha nho-tha" id="tha-loi">
+          <div class="to" id="ten-loi">Drop a lyrics file</div>
+          <div class="nho" id="thong-tin-loi">txt · srt · vtt · lrc · docx — or type below</div>
+        </div>
+        <input type="file" id="chon-loi" accept=".txt,.srt,.vtt,.lrc,.md,.docx,text/plain" multiple hidden>
+        <textarea id="loi" placeholder="One line per subtitle."></textarea>
+      </div>
+
+      <div class="muc">
+        <label class="o-chon"><input type="checkbox" id="tach" checked> Isolate vocals</label>
+        <label class="o-chon" style="margin-top:6px"><input type="checkbox" id="bo-nhan" checked> Skip section labels</label>
+      </div>
+
+      <div class="chan">
+        <button class="chinh" id="chay" disabled>Sync</button>
+        <div class="tien"><i id="thanh-tien"></i></div>
+        <div class="trang-thai" id="trang-thai"></div>
+      </div>
+    </div>
+
+    <div class="cot" id="phai">
+      <div class="trong" id="trong">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 12h2l2-6 3 14 3-11 2 5h6"/>
+        </svg>
+        <span>No result yet</span>
+      </div>
+
+      <div id="kq" hidden>
+        <div class="so-lieu">
+          <div><b id="sl-cau">0</b><span>Lines</span></div>
+          <div><b id="sl-tu">0</b><span>Words</span></div>
+          <div title="Vocal energy inside the timed lines vs outside them. Higher means the marks landed on the singing."><b id="sl-khop">—</b><span>Fit</span></div>
+          <div title="How sure the acoustic model is about the phonemes. Singing always scores lower than speech — a low number here does not mean the timing is wrong."><b id="sl-diem">0%</b><span>Phoneme</span></div>
+          <div><b id="sl-tg">0:00</b><span>Length</span></div>
+        </div>
+
+        <canvas class="song" id="song"></canvas>
+        <div class="dieu-khien">
+          <button class="nho" id="phat">Play</button>
+          <span class="gio" id="gio">0:00 / 0:00</span>
+        </div>
+
+        <table class="bang">
+          <thead><tr><th style="width:126px">Time</th><th style="width:22px"></th><th>Line</th><th style="width:92px"></th></tr></thead>
+          <tbody id="dong-loi"></tbody>
+        </table>
+
+        <div class="xuat">
+          <button class="nho" data-fmt="srt">SRT</button>
+          <button class="nho" data-fmt="vtt">VTT</button>
+          <button class="nho" data-fmt="lrc">LRC</button>
+          <button class="nho" data-fmt="lrc_word">LRC word</button>
+          <button class="nho" data-fmt="srt_word">SRT word</button>
+          <button class="nho" data-fmt="json">JSON</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="./app.js"></script>
+</body>
+</html>
