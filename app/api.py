@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
 
-from . import config, danh_gia, doc_loi, jobs, khoa, lyrics, srt, tinh
+from . import config, danh_gia, doc_loi, jobs, khoa, lyrics, srt, tai_len, tinh
 from . import align as al
 from . import audio as A
 from .separate import tach_giong
@@ -23,10 +23,28 @@ _mat_khau = khoa.gan_neu_can(app)
 _ket: dict = {}
 
 
+@app.post("/api/upload")
+async def api_upload(
+    file: UploadFile = File(...),
+    ma: str = Form(""),
+    chi_so: int = Form(0),
+    tong: int = Form(1),
+    ten: str = Form("audio"),
+):
+    """Nhận một phần của file.
+
+    Đường hầm Cloudflare gói miễn phí cắt request sau 100 giây, nên file lớn
+    gửi một lượt là bị cắt giữa đường. Chia phần thì mỗi request chỉ vài giây.
+    """
+    return tai_len.nhan_khoi(config.UPLOAD, ma, chi_so, tong, ten,
+                             await file.read())
+
+
 @app.post("/api/align")
 async def api_align(
-    audio: UploadFile = File(...),
     lyric: str = Form(...),
+    audio_ma: str = Form(""),
+    audio: UploadFile = File(None),
     tach_nhac: bool = Form(True),
     bo_nhan_doan: bool = Form(True),
 ):
@@ -34,9 +52,7 @@ async def api_align(
         raise HTTPException(400, "Lyrics are empty.")
 
     ma = jobs.tao()
-    dich = config.UPLOAD / f"{ma}_{Path(audio.filename or 'audio').name}"
-    with open(dich, "wb") as f:
-        shutil.copyfileobj(audio.file, f)
+    dich = await tai_len.lay_file(config.UPLOAD, audio_ma, audio, ma)
 
     def viec(bao):
         cac_dong, cac_tu = lyrics.phan_tich(lyric, bo_nhan_doan=bo_nhan_doan)

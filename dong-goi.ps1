@@ -74,19 +74,26 @@ Buoc 2 "Chép thư viện từ venv"
 $dich_sp = Join-Path $PYDIR "Lib\site-packages"
 New-Item -ItemType Directory -Force -Path $dich_sp | Out-Null
 
-# Danh sách CHÍNH XÁC những gì cần. Chép cả site-packages sang là mang theo
-# hàng gigabyte của những dự án khác trong cùng venv.
+# Danh sách này được SINH RA từ đồ thị phụ thuộc, không phải viết bằng tay.
+# Xem scratchpad/cay_phu_thuoc.py: bắt đầu từ các gói mã nguồn import trực
+# tiếp, rồi đọc Requires-Dist của từng gói để đi xuống hết mọi nhánh.
+#
+# Vì sao không viết tay: đã thử, và mất ba lượt đóng lại cả bộ 4 GB vì thiếu
+# torchgen, rồi _soundfile, rồi torio và tqdm. Mỗi lượt là mấy phút chờ, mà
+# lỗi chỉ lộ ra sau khi đóng xong.
+#
+# Các gói nvidia-* và triton nằm trong đồ thị nhưng KHÔNG có trong venv, và
+# không cần: bản torch cho Windows gói sẵn mọi DLL của CUDA vào torch\lib.
 $GOI = @(
-    "torch", "torchaudio", "torchgen", "functorch",
-    "demucs", "julius", "openunmix", "dora", "treetable", "einops",
-    "numpy", "scipy", "sympy", "mpmath", "networkx", "filelock", "fsspec",
-    "jinja2", "markupsafe", "typing_extensions.py", "typing_inspection",
-    "omegaconf", "antlr4", "yaml", "_yaml", "submitit", "cloudpickle",
-    "retrying", "colorlog", "hydra", "six", "lameenc",
-    "fastapi", "starlette", "pydantic", "pydantic_core", "annotated_types",
-    "uvicorn", "h11", "anyio", "sniffio", "idna", "click", "colorama",
-    "multipart", "python_multipart",
-    "chardet", "docx", "lxml"
+    "_yaml", "annotated_types", "antlr4", "anyio", "chardet", "click",
+    "cloudpickle", "colorama", "demucs", "docx", "dora", "einops",
+    "fastapi", "filelock", "fsspec", "functorch", "h11", "idna",
+    "importlib_metadata", "jinja2", "julius", "lameenc", "lxml", "markupsafe",
+    "mpmath", "multipart", "networkx", "numpy", "omegaconf", "openunmix",
+    "pydantic", "pydantic_core", "python_multipart", "retrying", "scipy", "sniffio",
+    "starlette", "submitit", "sympy", "torch", "torchaudio", "torchgen",
+    "torio", "tqdm", "treetable", "typing_extensions", "typing_inspection", "uvicorn",
+    "yaml", "zipp"
 )
 $thieu = @()
 foreach ($g in $GOI) {
@@ -100,12 +107,16 @@ foreach ($g in $GOI) {
         }
         continue
     }
-    # Không phải gói nào cũng là một THƯ MỤC. `retrying`, `six`,
-    # `typing_extensions` cài ra đúng một file .py — tìm không thấy thư mục rồi
-    # bỏ qua là máy khách chết ở dòng import, mà mãi mới lần ra vì sao.
-    $mot_file = Join-Path $SP "$g.py"
-    if (Test-Path $mot_file) {
-        Copy-Item $mot_file $dich_sp -Force
+    # Không phải gói nào cũng là một THƯ MỤC.
+    #   `retrying`, `six`, `soundfile`  -> một file .py
+    #   `_cffi_backend`                 -> một file .pyd đã biên dịch
+    # Tìm không thấy thư mục rồi bỏ qua là máy khách chết ở dòng import, mà
+    # mãi mới lần ra vì sao.
+    $roi = @(Get-ChildItem $SP -File -EA SilentlyContinue |
+             Where-Object { $_.Name -eq "$g.py" -or $_.Name -like "$g.cp*.pyd" -or
+                            $_.Name -like "$g-*.pyd" -or $_.Name -eq "$g.pyd" })
+    if ($roi.Count) {
+        $roi | ForEach-Object { Copy-Item $_.FullName $dich_sp -Force }
     } else {
         $thieu += $g
     }
@@ -165,7 +176,7 @@ Get-ChildItem $dich_sp -Recurse -File -Include *.lib, *.a -EA SilentlyContinue |
 # `torch.ao`, `torch._inductor`, `torch.distributed` — gãy ngay ở
 # `torch.utils.data.dataloader`, vì nó import `torch.distributed` ở dòng đầu.
 # Cả cụm đó cộng lại chỉ chừng 50 MB, không đáng để đổi lấy rủi ro.
-$BO = @("torch\include", "torch\test", "torch\share", "torch\bin", "torchgen")
+$BO = @("torch\include", "torch\test", "torch\share", "torch\bin")
 foreach ($b in $BO) {
     $d = Join-Path $dich_sp $b
     if (Test-Path $d) { Remove-Item $d -Recurse -Force -EA SilentlyContinue }
@@ -250,6 +261,8 @@ if (Test-Path $csc) {
     $tham = @("/nologo", "/target:winexe", "/optimize+",
               "/out:$(Join-Path $DIST 'LyricSync.exe')",
               "/reference:System.Windows.Forms.dll", "/reference:System.dll",
+              # System.Drawing: màn hình chờ của .exe dùng Font/Color/Point.
+              "/reference:System.Drawing.dll",
               (Join-Path $GOC "dongoi\LauncherExe.cs"))
     & $csc @tham | Out-Null
     if (-not (Test-Path (Join-Path $DIST "LyricSync.exe"))) { throw "csc không tạo được .exe" }
@@ -276,6 +289,37 @@ runtime\python\python.exe batch.py
 echo.
 pause
 "@ | Set-Content (Join-Path $DIST "Chay-thu-muc.bat") -Encoding ASCII
+
+# Tờ đọc-trước. Sinh ra từ đây chứ không viết tay vào dist: bản viết tay
+# bị mất sạch mỗi lần đóng gói lại, và đã mất một lần rồi.
+@'
+LYRIC SYNC
+Cham loi bai hat vao ban nhac, xuat ra file .srt co moc thoi gian tung cau.
+
+CACH CHAY
+  Nhay dup  LyricSync.exe
+
+  Mo len se thay mot khung nho ghi "Starting...". Lan dau cho toi mot phut:
+  no dang nap model va thu vien CUDA. Khung do TU BIEN MAT khi cua so ung
+  dung hien ra - dung nhay dup them lan nua.
+
+  Khong can cai gi them. Python, thu vien va model deu nam san trong thu muc
+  nay. Khong can mang.
+
+  Neu co truc trac, khung do se doi mau va bay thong bao loi ra ngay tren no
+  - boi den, chep, gui lai cho toi. Ban day du nam trong  data\khoi-dong.log
+
+CHEP SANG MAY KHAC
+  Chep NGUYEN CA THU MUC nay. Chep rieng file .exe thi khong chay duoc.
+
+CAN GI
+  Windows 10 tro len, 64-bit.
+  Card NVIDIA thi nhanh hon 4-5 lan, khong co van chay duoc.
+
+CHAY HANG LOAT
+  Bo file nhac + file loi cung ten vao  data\Test\Input\
+  roi bam  Chay-thu-muc.bat
+'@ | Set-Content (Join-Path $DIST "DOC-TRUOC.txt") -Encoding ASCII
 
 # ---------------------------------------------------------------- 8. tổng kết
 

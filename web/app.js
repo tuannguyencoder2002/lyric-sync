@@ -110,17 +110,61 @@ function ktChay() {
 
 // ------------------------------------------------------------------ chạy việc
 
-$("chay").onclick = async () => {
-  const fd = new FormData();
-  fd.append("audio", tep);
-  fd.append("lyric", $("loi").value);
-  fd.append("tach_nhac", $("tach").checked ? "true" : "false");
-  fd.append("bo_nhan_doan", $("bo-nhan").checked ? "true" : "false");
+// ------------------------------------------------------------ tải file lên
 
+// Chia 4 MB một phần.
+//
+// VÌ SAO: khi app mở ra ngoài qua đường hầm Cloudflare, gói miễn phí CẮT MỌI
+// REQUEST SAU 100 GIÂY. Một file WAV 32 MB trên đường tải lên 2 Mbps mất 132
+// giây -> bị cắt giữa đường, người dùng nhận lỗi 524 mà không hiểu vì sao.
+//
+// Chia phần thì mỗi phần là một request riêng, chỉ mất vài giây. Không bao giờ
+// chạm mốc 100 giây, bất kể file lớn cỡ nào và mạng nhanh chậm ra sao.
+//
+// 4 MB là chỗ cân: nhỏ hơn thì số lượt gửi tăng, mà mỗi lượt tốn một vòng
+// đi-về qua Cloudflare; lớn hơn thì gặp mạng chậm lại bắt đầu rủi ro.
+const KHOI_TAI = 4 * 1024 * 1024;
+
+async function taiLen(f, bao) {
+  const tong = Math.max(1, Math.ceil(f.size / KHOI_TAI));
+  let ma = "";
+  for (let i = 0; i < tong; i++) {
+    const fd = new FormData();
+    fd.append("file", f.slice(i * KHOI_TAI, (i + 1) * KHOI_TAI));
+    fd.append("ma", ma);
+    fd.append("chi_so", String(i));
+    fd.append("tong", String(tong));
+    fd.append("ten", f.name);
+    const r = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!r.ok) {
+      let chi = r.statusText;
+      try { chi = (await r.json()).detail || chi; } catch (_) {}
+      throw new Error("Upload failed: " + chi);
+    }
+    ma = (await r.json()).ma;
+    // Báo tiến độ theo phần ĐÃ GỬI XONG, không theo phần đang gửi: người dùng
+    // thấy 100% thì đúng là đã xong, không phải "đang gửi phần cuối".
+    if (bao) bao((i + 1) / tong, i + 1, tong);
+  }
+  return ma;
+}
+
+$("chay").onclick = async () => {
   $("chay").disabled = true;
-  datTrangThai("Uploading", false);
 
   try {
+    const ma_tep = await taiLen(tep, (p, i, n) => {
+      $("thanh-tien").style.width = (p * 100).toFixed(1) + "%";
+      datTrangThai(`Uploading ${Math.round(p * 100)}%  (${i}/${n})`, false);
+    });
+
+    const fd = new FormData();
+    fd.append("audio_ma", ma_tep);
+    fd.append("lyric", $("loi").value);
+    fd.append("tach_nhac", $("tach").checked ? "true" : "false");
+    fd.append("bo_nhan_doan", $("bo-nhan").checked ? "true" : "false");
+
+    datTrangThai("Starting", false);
     const r = await fetch("/api/align", { method: "POST", body: fd });
     if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
     maViec = (await r.json()).id;
